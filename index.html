@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nomi, Cose e Città</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+    header {
+      background-color: #0078D7;
+      color: #fff;
+      width: 100%;
+      text-align: center;
+      padding: 20px 0;
+    }
+    .container {
+      padding: 20px;
+      max-width: 900px;
+      width: 100%;
+    }
+    .random-letter {
+      font-size: 2rem;
+      margin: 10px 0;
+      color: #0078D7;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #0078D7;
+      color: #fff;
+    }
+    .input-cell input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    .player-cell input {
+      font-weight: bold;
+      text-align: center;
+    }
+    .repeated {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .unique {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #0078D7;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #0056a3;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Nomi, Cose e Città</h1>
+  </header>
+  <div class="container">
+    <p>Lettera selezionata: <span class="random-letter"></span></p>
+    <button id="generate-letter">Genera Lettera</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Giocatore</th>
+          <th>Nomi</th>
+          <th>Cose</th>
+          <th>Città</th>
+          <th>Animali</th>
+          <th>Lavoro</th>
+          <th>Colore</th>
+          <th>Totale</th>
+        </tr>
+      </thead>
+      <tbody id="game-table">
+        <!-- Righe dei giocatori -->
+      </tbody>
+    </table>
+    <button id="add-player">Aggiungi Giocatore</button>
+  </div>
+
+  <script>
+    const randomLetterEl = document.querySelector('.random-letter');
+    const tableBody = document.getElementById('game-table');
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const generateLetterButton = document.getElementById('generate-letter');
+    const addPlayerButton = document.getElementById('add-player');
+
+    // Genera una lettera casuale
+    function generateRandomLetter() {
+      const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+      randomLetterEl.textContent = randomLetter;
+    }
+
+    // Aggiungi una riga per un nuovo giocatore
+    function addPlayerRow() {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="player-cell"><input type="text" value="Giocatore ${tableBody.children.length + 1}"></td>
+        <td class="input-cell"><input type="text" data-category="nomi"></td>
+        <td class="input-cell"><input type="text" data-category="cose"></td>
+        <td class="input-cell"><input type="text" data-category="città"></td>
+        <td class="input-cell"><input type="text" data-category="animali"></td>
+        <td class="input-cell"><input type="text" data-category="lavoro"></td>
+        <td class="input-cell"><input type="text" data-category="colore"></td>
+        <td class="total-cell">0</td>
+      `;
+      tableBody.appendChild(row);
+    }
+
+    // Calcola i punti totali
+    function calculateScores() {
+      const rows = tableBody.querySelectorAll('tr');
+      rows.forEach(row => {
+        const inputs = row.querySelectorAll('.input-cell input');
+        const totalCell = row.querySelector('.total-cell');
+        let total = 0;
+
+        inputs.forEach(input => {
+          if (input.classList.contains('unique')) {
+            total += 10;
+          } else if (input.classList.contains('repeated')) {
+            total += 5;
+          }
+        });
+
+        totalCell.textContent = total;
+      });
+    }
+
+    // Controlla parole ripetute
+    function checkRepeatedWords() {
+      const inputs = document.querySelectorAll('.input-cell input');
+      const wordMap = {};
+
+      inputs.forEach(input => {
+        const value = input.value.trim().toLowerCase();
+        if (value) {
+          wordMap[value] = (wordMap[value] || 0) + 1;
+        }
+      });
+
+      inputs.forEach(input => {
+        const value = input.value.trim().toLowerCase();
+        if (value && wordMap[value] > 1) {
+          input.classList.add('repeated');
+          input.classList.remove('unique');
+        } else if (value) {
+          input.classList.add('unique');
+          input.classList.remove('repeated');
+        } else {
+          input.classList.remove('repeated', 'unique');
+        }
+      });
+
+      calculateScores();
+    }
+
+    // Event listeners
+    generateLetterButton.addEventListener('click', generateRandomLetter);
+    addPlayerButton.addEventListener('click', addPlayerRow);
+    document.addEventListener('input', checkRepeatedWords);
+
+    // Inizializzazione
+    generateRandomLetter();
+    addPlayerRow();
+  </script>
+</body>
+</html>
